@@ -5,12 +5,13 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
 
 # Memuat data dan model
-file_path = "D:\Dani\PSD\weather.csv"  # Ganti path dengan path file CSV Anda
+file_path = "weather.csv" 
 df = pd.read_csv(file_path)
 
 # Drop date
@@ -26,7 +27,6 @@ X = df.drop('weather', axis=1)
 y = df['weather']
 
 # Split data untuk training dan testing
-from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Model Decision Tree
@@ -56,11 +56,11 @@ def predict_weather(precipitation, temp_max, temp_min, wind):
 st.sidebar.title("Pilih Tab")
 
 if 'tab' not in st.session_state:
-    st.session_state.tab = "Prediksi Cuaca"
+    st.session_state.tab = "Home"
 
 # Tombol untuk Data Asli
-if st.sidebar.button("Data Asli"):
-    st.session_state.tab = "Data Asli"
+if st.sidebar.button("Home"):
+    st.session_state.tab = "Home"
 
 # Tombol untuk Prediksi Cuaca
 if st.sidebar.button("Prediksi Cuaca"):
@@ -117,11 +117,63 @@ if st.session_state.tab == "Prediksi Cuaca":
         st.write("Akurasi Model :")
         st.table(accuracy_data)
 
-
 # Konten untuk Data Asli
-elif st.session_state.tab == "Data Asli":
-    st.title("Data Asli")
-    st.dataframe(df)
+elif st.session_state.tab == "Home":
+    st.title("Halaman Utama")
+    st.write("Selamat Datang di Aplikasi Prediksi Cuaca, Silahkan pilih tab yang tersedia dan aplikasi akan memberikan prediksi cuaca berdasarkan input yang diberikan.")
+    st.header("Data Asli")
+    data_awal = pd.read_csv(file_path)
+    data_awal = data_awal.drop('date', axis=1)
+    st.dataframe(data_awal)
+
+    # Normalisasi data
+    st.header("Data Setelah Normalisasi")
+    st.dataframe(scaler.fit_transform(df[columns_to_normalize]))
+
+    # Klasifikasi Decision Tree
+    st.header("Klasifikasi Decision Tree")
+    st.write("Akurasi Model Decision Tree : ", calculate_accuracy(dt_model, "Decision Tree"))
+    # Evaluate model
+    dt_y_pred = dt_model.predict(X_test)
+    dt_accuracy = accuracy_score(y_test, dt_y_pred)
+    dt_precision = precision_score(y_test, dt_y_pred, average='weighted')
+    dt_recall = recall_score(y_test, dt_y_pred, average='weighted')
+    dt_f1 = f1_score(y_test, dt_y_pred, average='weighted')
+    metrics_df = pd.DataFrame({
+        'Matriks': ['Akurasi', 'Presisi', 'Recall', 'F1 Score'],
+        'Nilai': [dt_accuracy, dt_precision, dt_recall, dt_f1]
+    })
+    st.write(metrics_df)
+
+    # Klasifikasi KNN
+    st.header("Klasifikasi KNN")
+    st.write("Akurasi Model KNN : ", calculate_accuracy(knn_model, "KNN"))
+    # Evaluate model
+    knn_y_pred = knn_model.predict(X_test)
+    knn_accuracy = accuracy_score(y_test, knn_y_pred)
+    knn_precision = precision_score(y_test, knn_y_pred, average='weighted')
+    knn_recall = recall_score(y_test, knn_y_pred, average='weighted')
+    knn_f1 = f1_score(y_test, knn_y_pred, average='weighted')
+    metrics_df = pd.DataFrame({
+        'Matriks': ['Akurasi', 'Presisi', 'Recall', 'F1 Score'],
+        'Nilai': [knn_accuracy, knn_precision, knn_recall, knn_f1]
+    })
+    st.write(metrics_df)
+
+    # Klasifikasi Gradient Boosting
+    st.header("Klasifikasi Gradient Boosting")
+    st.write("Akurasi Model Gradient Boosting : ", calculate_accuracy(gb_model, "Gradient Boosting"))
+    # Evaluate model
+    gb_y_pred = gb_model.predict(X_test)
+    gb_accuracy = accuracy_score(y_test, gb_y_pred)
+    gb_precision = precision_score(y_test, gb_y_pred, average='weighted')
+    gb_recall = recall_score(y_test, gb_y_pred, average='weighted')
+    gb_f1 = f1_score(y_test, gb_y_pred, average='weighted')
+    metrics_df = pd.DataFrame({
+        'Matriks': ['Akurasi', 'Presisi', 'Recall', 'F1 Score'],
+        'Nilai': [gb_accuracy, gb_precision, gb_recall, gb_f1]
+    })
+    st.write(metrics_df)
 
 # Konten untuk Grafik
 elif st.session_state.tab == "Grafik":
