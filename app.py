@@ -9,9 +9,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
-
 # Memuat data dan model
-file_path = "weather.csv" 
+file_path = "D:\Dani\PSD\weather.csv" 
 df = pd.read_csv(file_path)
 
 # Drop date
@@ -26,8 +25,19 @@ df[columns_to_normalize] = scaler.fit_transform(df[columns_to_normalize])
 X = df.drop('weather', axis=1)
 y = df['weather']
 
+# Dropdown untuk memilih rasio split data
+split_ratio = st.selectbox("Pilih rasio split data:", ["70/30", "80/20", "90/10"], index=1)
+
+# Menentukan test_size berdasarkan pilihan dropdown
+if split_ratio == "70/30":
+    test_size = 0.3
+elif split_ratio == "80/20":
+    test_size = 0.2
+else:
+    test_size = 0.1
+
 # Split data untuk training dan testing
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
 
 # Model Decision Tree
 dt_model = DecisionTreeClassifier(criterion='gini', max_depth=None, random_state=42)
@@ -101,9 +111,6 @@ if st.session_state.tab == "Prediksi Cuaca":
         }
         st.write('Prediksi Cuaca :')
         st.dataframe(predict)
-        # st.write('Prediksi Cuaca (Decision Tree):', dt_pred)
-        # st.write('Prediksi Cuaca (KNN):', knn_pred)
-        # st.write('Prediksi Cuaca (Gradient Boosting):', gb_pred)
 
         # Tampilkan akurasi dari masing-masing model setelah prediksi
         dt_accuracy = calculate_accuracy(dt_pred, "Decision Tree")
