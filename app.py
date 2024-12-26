@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 # Memuat data dan model
-file_path = "D:\Dani\PSD\weather.csv" 
+file_path = "weather.csv" 
 df = pd.read_csv(file_path)
 
 # Drop date
